@@ -13,8 +13,8 @@ class ViewController: UIViewController,URLSessionDownloadDelegate {
     
     
     let urlString = "https://static.pexels.com/photos/699796/pexels-photo-699796.jpeg"
-    
     var shape:CAShapeLayer!
+    var pulseLayer:CAShapeLayer!
     
     let percentageLabel :UILabel = {
         let label = UILabel()
@@ -30,31 +30,40 @@ class ViewController: UIViewController,URLSessionDownloadDelegate {
         label.text = "Completed"
         label.font = UIFont.boldSystemFont(ofSize: 15)
         label.textAlignment = .center
+        label.textColor = UIColor.white
         return label
     }()
+    
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //completionLabel
-        view.addSubview(completionLabel)
-        completionLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        completionLabel.center = CGPoint(x: view.center.x, y: view.center.y + 30)
+        view.backgroundColor = .black
+        let path = UIBezierPath(arcCenter: .zero, radius: 100, startAngle: 0, endAngle: 2*CGFloat.pi, clockwise: true)
+        path.lineCapStyle = .round
         
-        // percentageLabel Configuration
-        view.addSubview(percentageLabel)
-        percentageLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        percentageLabel.center = view.center
+        // pulse configuration
+        pulseLayer = CAShapeLayer()
+        pulseLayer.path = path.cgPath
+        pulseLayer.strokeColor = UIColor.clear.cgColor
+        pulseLayer.lineWidth = 5
+        pulseLayer.fillColor =  UIColor.red.cgColor
+        pulseLayer.position = view.center
+        view.layer.addSublayer(pulseLayer)
+        doPulseAnimation()
+        
         
         //track layer
         let trackLayer = CAShapeLayer()
-        let path = UIBezierPath(arcCenter: .zero, radius: 100, startAngle: 0, endAngle: 2*CGFloat.pi, clockwise: true)
-        path.lineCapStyle = .round
         trackLayer.path = path.cgPath
         trackLayer.strokeColor = UIColor.lightGray.cgColor
         trackLayer.lineWidth = 20.0
-        trackLayer.fillColor =  UIColor.clear.cgColor
+        trackLayer.fillColor =  UIColor.black.cgColor
         trackLayer.position = view.center
         view.layer.addSublayer(trackLayer)
         
@@ -70,9 +79,29 @@ class ViewController: UIViewController,URLSessionDownloadDelegate {
         shape.transform = CATransform3DMakeRotation(-CGFloat.pi / 2, 0, 0, 1)
         view.layer.addSublayer(shape)
         
+        //completionLabel
+        view.addSubview(completionLabel)
+        completionLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        completionLabel.center = CGPoint(x: view.center.x, y: view.center.y + 30)
+        
+        // percentageLabel Configuration
+        view.addSubview(percentageLabel)
+        percentageLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        percentageLabel.center = view.center
+        
         // tap gesture recognizer
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewTapped)))
         
+    }
+    
+    fileprivate func doPulseAnimation(){
+        let basicAnimation = CABasicAnimation(keyPath: "transform.scale")
+        basicAnimation.toValue = 1.2
+        basicAnimation.duration = 1.5
+        basicAnimation.autoreverses = true
+        basicAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        basicAnimation.repeatCount = Float.infinity
+        pulseLayer.add(basicAnimation, forKey: "pulseAnimation")
     }
     
     fileprivate func doAnimation() {
@@ -114,9 +143,9 @@ class ViewController: UIViewController,URLSessionDownloadDelegate {
     
     @objc func viewTapped() {
         doDownload()
-
-//        doAnimation()
         
-}
+        //        doAnimation()
+        
+    }
 }
 
